@@ -27,7 +27,15 @@ function readWholeFile() {
   //       receives a Buffer.
   // TODO: if there is an error, log it and return.
   // TODO: log the size in bytes. A Buffer has a .length property (bytes).
-  //       Example log: "readFile: loaded 524288 bytes into memory".
+  //       Example log: "readFile: loaded 524288 bytes into memory"
+  fs.readFile(INPUT, (err, data) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+
+    console.log(`readFile: loaded ${data.length} bytes into memory at once`);
+  });
 }
 
 // ── PART 2: stream the file and pipe it to a writable stream ────────────────
@@ -37,6 +45,14 @@ function streamFile() {
   // TODO: pipe the readable into the writable: readable.pipe(writable).
   // TODO: listen for the writable's "finish" event and log a done message,
   //       e.g. "stream: finished copying via 64KB chunks (flat memory)".
+  const readable = fs.createReadStream(INPUT);
+  const writable = fs.createWriteStream(OUTPUT);
+
+  writable.on('finish', () => {
+    console.log('stream: finished copying via 64KB chunks (flat memory)');
+  });
+
+  readable.pipe(writable);
 }
 
 // ── PART 3: explain the difference ──────────────────────────────────────────
@@ -46,7 +62,8 @@ function streamFile() {
 //       so peak memory stays flat regardless of file size.
 //
 // YOUR EXPLANATION:
-//
+//fs.readFile loads the entire file into memory at once, which can lead to high memory usage and potential crashes for very large files. In contrast, streaming processes the file in smaller chunks, allowing for a more efficient use of memory and enabling the handling of large files without overwhelming system resources.
+//A stream moves the file in chunks, keeping peak memory usage flat regardless of the file size, making it a more scalable solution for large files.
 
 // Run both approaches.
 readWholeFile();
